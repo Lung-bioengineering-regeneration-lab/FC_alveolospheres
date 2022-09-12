@@ -2,9 +2,22 @@ Deconvolution analysis of bulk RNAseq of iPSC-derived alveolosphers
 treated with the Fibrosis Cocktail (FC)
 ================
 
-# Reanalysis of a previously published single cell GSE150068 for use with reference based deconvolution.
+### Table of Contents  
+
+- ["Part 1: Preparation of the single cell dataset"](#part1)
+
+- ["Part 2. Bisque analysis"](#part2)  
+    - ["Part 2a. Prepare the bulk data"](#part2a)  
+    - ["Part 2b. Prepare the single cell data"](#part2b)  
+    - ["Part 2c. Run BisqueRNA"](#part2c)  
+
+<div id="part1"> 
 
 ## Part 1: Preparation of the single cell dataset
+
+</div>
+
+### Reanalysis of a previously published single cell GSE150068 for use with reference based deconvolution.
 
 The single cell dataset was first published in Kathiriya et al 2022 (1).
 [GSE150068](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE150068)
@@ -23,6 +36,13 @@ sets and finally will merge the datasets, normalize them, scale them,
 and perfrom batch correction through harmonize.
 
 ### Load necessary libraries and raw data
+
+load libraries
+
+```{r message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+required.packages <- c("tidyverse", "Seurat", "ggpubr")
+lapply(required.packages, library, character.only = TRUE)
+```
 
 Load each of the files in a list for processing. NOTE: data must be
 first downloaded from the GEO database.
@@ -757,8 +777,10 @@ hAOH@meta.data %>%  head()
 ``` r
 write.csv(hAOH@meta.data, file = "hAOH_metadata.csv")
 ```
+<div id="part2"> 
 
-## Part 2. Bisque anaysis using reference dataset from part 1
+## Part 2. Bisque anaysis using the reference dataset prepared in [Part1](#part1)</a>
+</div>
 
 The goal of this analysis is to deconvolute bulk RNAseq data from iPSC
 derived alveolospheres that are treated with/out the fibrosis cocktail
@@ -766,9 +788,18 @@ derived alveolospheres that are treated with/out the fibrosis cocktail
 
 Bulk RNAseq was performed as indicated in the manuscript.
 
-load libraries
+load the necessary libraries
+```{r echo=TRUE}
+pckgs <- c("BisqueRNA", "Biobase", "biomaRt","Matrix", "tidyverse", "Seurat", "ade4")
+lapply(pckgs, library, character.only=TRUE)
+```
+
+
+
+<div id="part2a"> 
 
 ### Preparation of the bulk data for analysis
+</div>
 
 The data has to be first prepared into an expressionSet in order to be
 inputted into BisqueRNA.
@@ -870,7 +901,10 @@ nrow(bulk.eset)
     ## Features 
     ##    25465
 
+<div id="part2b"> 
+
 ### Preparation of the single cell reference dataset for BisqueRNA analysis
+</div>
 
 The reference dataset has to be in an expressionSet.
 
@@ -901,7 +935,7 @@ rownames(raw.sc) <- e2e2$ens_gene
 raw.sc <- as.matrix(raw.sc)
 ```
 
-Prepare the expressionSet object.
+Prepare the expressionSet for the reference datasetobject.
 
 ``` r
 #### prepare Seurat Objec, however, change annotation to ensemble ids for genes.
@@ -924,7 +958,10 @@ sc.eset <- Biobase::ExpressionSet(assayData=raw.sc,
                                   phenoData=sc.pdata)
 ```
 
-### Running the bisque
+<div id="part2c"> 
+
+### Running the deconvolution using BisqueRNA
+</div>
 
 ``` r
 res <- BisqueRNA::ReferenceBasedDecomposition(bulk.eset = bulk.eset
